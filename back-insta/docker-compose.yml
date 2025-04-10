@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: instagram_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: instagram_clone
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: instagram_backend
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: instagram_clone
+      WATCHPACK_POLLING: true
+      CHOKIDAR_USEPOLLING: true
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+    command: npm run start:dev 
+
+volumes:
+  pgdata:
